@@ -2,8 +2,8 @@ name: CICD using Docker
 on:
  push:
 jobs:
- demo1:
-  runs-on: ubuntu-latest
+ CICD:
+  runs_on: ubuntu-latest
   steps:
    - name: Checkout the code 
      uses: actions/checkout@v3
@@ -13,5 +13,18 @@ jobs:
       java-version: '11'
       distribution: 'temurin'
       cache: maven  
+   - name: setup Docker 
+     uses: actions/setup-buildx-action@v2
    - name: build with maven 
      run: mvn -B package --file pom.xml
+   - name: Login to docker hub
+     uses: docker/login-action@v2
+     with:
+      username: ${{ secrets.DOCKERHUB_USERNAME }}
+      password: ${{ secrets.DOCKERHUB_TOKEN }}
+   - name: build the dockerfile and push
+     uses: docker/build-push-action@v4
+     with:
+      context: .
+      push: true 
+      tags: ${{ secrets.DOCKERHUB_USERNAME }}/myimage01
